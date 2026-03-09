@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*$py.class
+backend/models/*.pkl
+backend/flight_log.csv
+
+frontend/node_modules/
+frontend/build/
+.DS_Store
+
+.env
