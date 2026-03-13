@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class DroneTelemetry(BaseModel):
+class TelemetryData(BaseModel):
     battery_level: float
     altitude: float
     velocity: float
