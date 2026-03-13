@@ -1,26 +1,40 @@
-This is a small full-stack project that simulates autonomous drone decision making from telemetry data. A machine-learning model receives drone telemetry (battery, altitude, velocity, GPS signal, obstacle distance) and outputs a flight decision - continue, holdm return home
-The React dashboard visualizes the decision and explains the model logic using SHAP feature attribution.
-Stack
-Backend: FastAPI + Scikit-Learn
-Frontend: React + Tailwind HUD interface
-Explainability: SHAP
-Infrastructure: Docker Compose
+A hybrid AI system that simulates autonomous drone decision making using Computer Vision, ML, and a C++ safety engine. The system processes telemetry data and visual input to decide whether a drone should continue flight, hold position, or return home. The project combines multiple components:
 
-To run it:
+-Computer Vision perception  
+-C++ safety rules engine  
+-Machine Learning decision model  
+-FastAPI backend  
+-Real-time video streaming dashboard
 
-1. Clone
-2. Start the system (docker build)
-3. Open the interface
-Frontend dashboard: http://localhost:3000
-API documentation: http://localhost:8000/docs
+The camera detects obstacles and updates the drone's perception in real time. It demonstrates a multi-layer autonomous drone decision pipeline similar to real robotics systems.
+• Detect obstacles using OpenCV  
+• Apply hard safety rules using C++  
+• Use ML to make flight decisions  
+• Stream camera data through a backend API  
+• Simulate real drone telemetry
 
-to see it working
+Stack:
+-Python  
+-FastAPI  
+-OpenCV  
+-Scikit-Learn  
+-SHAP  
+-C++ 
 
-1. Open the dashboard in the browser.
-2. Move the telemetry sliders (battery, altitude, GPS, etc.).
-3. The backend ML model returns a real-time flight decision.
+Tools:
+-OpenCV – obstacle detection  
+-FastAPI – backend API server  
+-Uvicorn – ASGI server  
+-Scikit-Learn – ML model  
+-SHAP – decision explainability  
+-Git – version control  
 
-The SHAP chart explains which telemetry factors influenced the decision.
-
-Each prediction is also written to a flight log csv file acting as a black-box recorder.
-Additionally, Monitor is run to check logged telemetry for anomalies or drift. the command is docker-compose exec api python monitor.py
+too see it working:
+-Install dependencies: 
+pip install fastapi uvicorn opencv-python scikit-learn shap pandas joblib
+-Start the backend:
+uvicorn backend.main:app --reload
+-Open API docs:
+http://127.0.0.1:8000/docs
+-View camera feed:
+http://127.0.0.1:8000/video_feed
