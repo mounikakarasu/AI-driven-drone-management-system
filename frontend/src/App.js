@@ -16,7 +16,7 @@ const App = () => {
 
   const fetchDecision = async () => {
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://13.60.85.9:8000";
+      const API_URL = process.env.REACT_APP_API_URL || "http://56.228.33.116:8000";
 const response = await fetch(`${API_URL}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
