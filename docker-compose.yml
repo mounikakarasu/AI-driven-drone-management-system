@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./backend
+    container_name: drone-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+
+  frontend:
+    build: ./frontend
+    container_name: drone-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  redis:
+    image: redis:alpine
+    container_name: drone-redis
+    ports:
+      - "6379:6379"
