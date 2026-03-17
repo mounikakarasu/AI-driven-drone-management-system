@@ -48,18 +48,28 @@ class DroneBrain:
         # 4. SHAP values
         shap_values = self.explainer.shap_values(df)
 
-        # Handle different SHAP output formats
-        if isinstance(shap_values, list):
-            current_shap = shap_values[pred_idx][0]
-        else:
-            # Covers newer SHAP versions
-            try:
-                current_shap = shap_values[0, pred_idx, :]
-            except:
+        # Extract SHAP values for the predicted class
+        # shap_values can be: list of arrays (one per class), or 3D array
+        try:
+            if isinstance(shap_values, list):
+                # List of arrays: each is (n_samples, n_features)
+                sv = np.array(shap_values[pred_idx])
+                current_shap = sv.flatten()[:len(self.feature_names)]
+            elif shap_values.ndim == 3:
+                # 3D array: (n_samples, n_features, n_classes) or (n_samples, n_classes, n_features)
+                if shap_values.shape[1] == len(self.feature_names):
+                    current_shap = shap_values[0, :, pred_idx]
+                else:
+                    current_shap = shap_values[0, pred_idx, :]
+            else:
+                # 2D array: (n_samples, n_features)
                 current_shap = shap_values[0]
+        except Exception:
+            # Fallback: equal weights
+            current_shap = np.ones(len(self.feature_names))
 
         # 5. Normalize feature impacts → percentages
-        raw_impacts = [abs(float(v)) for v in current_shap]
+        raw_impacts = [abs(float(v)) for v in current_shap[:len(self.feature_names)]]
         total = sum(raw_impacts) if sum(raw_impacts) > 0 else 1.0
 
         logic_breakdown = {

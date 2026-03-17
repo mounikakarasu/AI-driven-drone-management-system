@@ -24,7 +24,7 @@ const response = await fetch(`${API_URL}/predict`, {
       });
 
       const result = await response.json();
-      setData(result);
+      if (response.ok) setData(result);
 
     } catch (err) {
       console.error("API Offline - Ensure Docker is running");
@@ -117,7 +117,7 @@ const response = await fetch(`${API_URL}/predict`, {
               <div className="flex justify-center gap-8 text-sm">
                 <div className="flex items-center gap-2">
                   <Cpu size={16}/>
-                  CONFIDENCE: {data ? data.confidence.toFixed(0) : 0}%
+                  CONFIDENCE: {data?.confidence != null ? data.confidence.toFixed(0) : 0}%
                 </div>
 
                 <div className="flex items-center gap-2">
