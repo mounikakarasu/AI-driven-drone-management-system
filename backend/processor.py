@@ -16,21 +16,28 @@ class DroneBrain:
             data_dict['obstacle_distance'],
             data_dict['gps_signal']
         )
-        if safety_status != "SAFE":
-            return {
-                "decision": safety_status,
-                "confidence": 1.0,
-                "primary_factor": "C++_SAFETY_ENGINE",
-                "logic_breakdown": {k: 0.0 for k in data_dict.keys()}
-            }
+    
         df = pd.DataFrame([data_dict])
+        shap_values = self.explainer.shap_values(df)
         pred_idx = int(self.model.predict(df)[0])
-        probs = self.model.predict_proba(df)[0]
+        
+        if isinstance(shap_values, list):
+            current_shap = shap_values[pred_idx][0]
+        else:
+            current_shap = shap_values[0]
+
+        logic_breakdown = {}
+        for i, col in enumerate(df.columns):
+            impact = abs(float(current_shap[i]))
+            logic_breakdown[col] = round(impact, 4)
+
+        decision = safety_status if safety_status != "SAFE" else self.classes[pred_idx]
+        
         return {
-            "decision": self.classes[pred_idx],
-            "confidence": round(float(np.max(probs)), 2),
-            "primary_factor": "ML_MODEL",
-            "logic_breakdown": {k: 1.0 for k in data_dict.keys()}
+            "decision": decision,
+            "confidence": round(float(np.max(self.model.predict_proba(df)[0])), 2),
+            "primary_factor": "C++_SAFETY_ENGINE" if safety_status != "SAFE" else "NEURAL_INFERENCE",
+            "logic_breakdown": logic_breakdown
         }
 
 brain = DroneBrain()
