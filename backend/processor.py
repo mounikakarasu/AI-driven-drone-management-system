@@ -2,8 +2,25 @@ import joblib
 import pandas as pd
 import shap
 import numpy as np
-import drone_safety
 import os
+
+try:
+    import drone_safety
+    SAFETY_ENGINE = "C++"
+except ImportError:
+    SAFETY_ENGINE = "PYTHON"
+    print("[WARN] C++ drone_safety module not found — using Python fallback")
+
+    class _DroneSafetyFallback:
+        @staticmethod
+        def evaluate_safety(battery: float, obstacle_dist: float, gps_signal: int) -> str:
+            if battery < 20.0 or gps_signal < 3:
+                return "RETURN_HOME"
+            if obstacle_dist < 5.0:
+                return "HOLD"
+            return "SAFE"
+
+    drone_safety = _DroneSafetyFallback()
 
 class DroneBrain:
     def __init__(self):

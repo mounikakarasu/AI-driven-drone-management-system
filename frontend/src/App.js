@@ -16,7 +16,7 @@ const App = () => {
 
   const fetchDecision = async () => {
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://56.228.33.116:8000";
+      const API_URL = process.env.REACT_APP_API_URL || "";
 const response = await fetch(`${API_URL}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,7 +117,7 @@ const response = await fetch(`${API_URL}/predict`, {
               <div className="flex justify-center gap-8 text-sm">
                 <div className="flex items-center gap-2">
                   <Cpu size={16}/>
-                  CONFIDENCE: {data ? (data.confidence * 100).toFixed(0) : 0}%
+                  CONFIDENCE: {data ? data.confidence.toFixed(0) : 0}%
                 </div>
 
                 <div className="flex items-center gap-2">
