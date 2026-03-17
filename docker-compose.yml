@@ -6,16 +6,21 @@ services:
     container_name: drone-api
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
     depends_on:
       - redis
+    environment:
+      - ENV=production
 
   frontend:
     build: ./frontend
     container_name: drone-frontend
     ports:
       - "3000:3000"
+    environment:
+      - WDS_SOCKET_PORT=0
+      - HOST=0.0.0.0
+    stdin_open: true
+    tty: true
     depends_on:
       - api
 
@@ -24,3 +29,4 @@ services:
     container_name: drone-redis
     ports:
       - "6379:6379"
+  
