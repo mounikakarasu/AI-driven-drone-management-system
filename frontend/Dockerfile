@@ -1,7 +1,6 @@
 FROM node:18
 
 WORKDIR /app
-COPY ./backend /app
 
 COPY package*.json ./
 
