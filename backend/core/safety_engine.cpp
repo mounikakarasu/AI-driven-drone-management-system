@@ -17,4 +17,3 @@ PYBIND11_MODULE(drone_safety, m) {
     m.doc() = "High-performance C++ safety engine for Drone OS";
     m.def("evaluate_safety", &evaluate_safety, "Evaluate drone safety status");
 }
-EOT
