@@ -67,13 +67,18 @@ def video_feed():
 
 @app.post("/predict")
 async def predict(data: TelemetryData):
-    telemetry_data = data.dict()
-    # Use slider value from frontend; only override if camera is active
-    if camera is not None:
-        telemetry_data['obstacle_distance'] = current_obstacle_distance
+    import traceback
+    try:
+        telemetry_data = data.dict()
+        # Use slider value from frontend; only override if camera is active
+        if camera is not None:
+            telemetry_data['obstacle_distance'] = current_obstacle_distance
 
-    result = brain.process_telemetry(telemetry_data)
-    return result
+        result = brain.process_telemetry(telemetry_data)
+        return result
+    except Exception as e:
+        tb = traceback.format_exc()
+        return JSONResponse({"error": str(e), "traceback": tb}, status_code=500)
 
 
 if __name__ == "__main__":
