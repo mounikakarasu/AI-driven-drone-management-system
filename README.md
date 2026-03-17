@@ -1,30 +1,5 @@
 It is a full-stack system that acts as the "brain" for autonomous drone operations. It processes telemetry data through a three-layer decision pipeline — computer vision, hard-coded safety rules, and machine learning — then explains every decision to the human operator in real time. The system prioritizes transparent autonomy: operators don't just see what the drone decides, they see why.
 
-architecture and design
-
-┌──────────────────────────────────────────────────────────────┐
-│  FRONTEND (React + Tailwind)  :3000                          │
-│  Tactical HUD with telemetry sliders + SHAP visualization    │
-└──────────────────┬───────────────────────────────────────────┘
-                   │ POST /predict
-┌──────────────────▼───────────────────────────────────────────┐
-│  BACKEND (FastAPI + Uvicorn)  :8000                          │
-│                                                              │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ Layer 1: PERCEPTION (OpenCV)                            │ │
-│  │ HSV color detection → contour analysis → distance calc  │ │
-│  ├─────────────────────────────────────────────────────────┤ │
-│  │ Layer 2: SAFETY (C++ via Pybind11)                      │ │
-│  │ Hard constraints: battery < 20% → RETURN_HOME           │ │
-│  │                   GPS < 3 → RETURN_HOME                 │ │
-│  │                   obstacle < 5m → HOLD                  │ │
-│  ├─────────────────────────────────────────────────────────┤ │
-│  │ Layer 3: INTELLIGENCE (scikit-learn + SHAP)             │ │
-│  │ RandomForest classifier → SHAP TreeExplainer            │ │
-│  │ Returns: decision, confidence, feature importance       │ │
-│  └─────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────┘
-
 Decision flow: Safety layer runs first and if a hard constraint is violated, the C++ engine overrides the ML model entirely. If the environment is "SAFE," the Random Forest evaluates all 5 telemetry features and SHAP deconstructs the prediction into per-feature importance percentages.
 
 Stack:
