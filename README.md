@@ -1,70 +1,130 @@
-# Getting Started with Create React App
+# Drone OS // Command Center
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An autonomous drone decision engine with a hybrid C++/Python pipeline, explainable AI, and a real-time tactical HUD.
 
-## Available Scripts
+## Description
 
-In the project directory, you can run:
+Drone OS is a full-stack system that acts as the "brain" for autonomous drone operations. It processes telemetry data through a three-layer decision pipeline — computer vision, hard-coded safety rules, and machine learning — then explains every decision to the human operator in real time. The system prioritizes transparent autonomy: operators don't just see what the drone decides, they see why.
 
-### `npm start`
+## Architecture & Design
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+┌──────────────────────────────────────────────────────────────┐
+│  FRONTEND (React + Tailwind)  :3000                          │
+│  Tactical HUD with telemetry sliders + SHAP visualization    │
+└──────────────────┬───────────────────────────────────────────┘
+                   │ POST /predict
+┌──────────────────▼───────────────────────────────────────────┐
+│  BACKEND (FastAPI + Uvicorn)  :8000                          │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Layer 1: PERCEPTION (OpenCV)                            │ │
+│  │ HSV color detection → contour analysis → distance calc  │ │
+│  ├─────────────────────────────────────────────────────────┤ │
+│  │ Layer 2: SAFETY (C++ via Pybind11)                      │ │
+│  │ Hard constraints: battery < 20% → RETURN_HOME           │ │
+│  │                   GPS < 3 → RETURN_HOME                 │ │
+│  │                   obstacle < 5m → HOLD                  │ │
+│  ├─────────────────────────────────────────────────────────┤ │
+│  │ Layer 3: INTELLIGENCE (scikit-learn + SHAP)             │ │
+│  │ RandomForest classifier → SHAP TreeExplainer            │ │
+│  │ Returns: decision, confidence, feature importance       │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**Decision flow:** Safety layer runs first — if a hard constraint is violated, the C++ engine overrides the ML model entirely. If the environment is "SAFE," the Random Forest evaluates all 5 telemetry features and SHAP deconstructs the prediction into per-feature importance percentages.
 
-### `npm test`
+## Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Layer | Technology | Purpose |
+|---|---|---|
+| Frontend | React 19, Tailwind CSS, Recharts, Framer Motion | Tactical HUD dashboard |
+| API | FastAPI, Uvicorn | Low-latency REST API |
+| Safety Engine | C++ (compiled via Pybind11) | Deterministic safety overrides |
+| ML Model | scikit-learn (RandomForest) | Flight decision classification |
+| Explainability | SHAP (TreeExplainer) | Per-feature decision breakdown |
+| Computer Vision | OpenCV | Obstacle detection via HSV + contours |
+| Infrastructure | Docker, Docker Compose, Redis | Containerized deployment |
 
-### `npm run build`
+## Tools & Libraries
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**Backend:** Python 3.11, FastAPI, Uvicorn, scikit-learn, SHAP, OpenCV, Pandas, NumPy, Pybind11, Joblib
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**Frontend:** React, Tailwind CSS, Recharts, Framer Motion, Lucide React
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**DevOps:** Docker, Docker Compose, Redis
 
-### `npm run eject`
+## How to Run
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Prerequisites
+- Docker and Docker Compose installed
+- Git
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Quick Start
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+# Clone the repository
+git clone <repo-url>
+cd drone_system
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# Build and start all services
+docker-compose up --build -d
 
-## Learn More
+# Services will be available at:
+# Frontend (HUD):  http://localhost:3000
+# Backend (API):   http://localhost:8000
+# API Docs:        http://localhost:8000/docs
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Usage
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Open the frontend at `http://localhost:3000`
+2. Adjust the telemetry sliders on the left panel (battery, altitude, velocity, GPS signal, obstacle distance)
+3. Watch the AI decision update in real time on the right panel
+4. The SHAP bar chart below shows exactly which features drove the decision
 
-### Code Splitting
+### Test the API Directly
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "battery_level": 85,
+    "altitude": 100,
+    "velocity": 12,
+    "gps_signal": 9,
+    "obstacle_distance": 25
+  }'
+```
 
-### Analyzing the Bundle Size
+### Stop
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+docker-compose down
+```
 
-### Making a Progressive Web App
+## Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+drone_system/
+├── backend/
+│   ├── core/
+│   │   └── safety_engine.cpp    # C++ safety rules (Pybind11)
+│   ├── models/
+│   │   └── drone_model.pkl      # Trained RandomForest model
+│   ├── main.py                  # FastAPI server + endpoints
+│   ├── processor.py             # DroneBrain: ML + SHAP pipeline
+│   ├── cv_engine.py             # OpenCV obstacle detection
+│   ├── schemas.py               # Pydantic request models
+│   ├── train_model.py           # Model training script
+│   ├── setup.py                 # C++ module compilation config
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   └── App.js               # React tactical HUD
+│   ├── package.json
+│   └── Dockerfile
+└── docker-compose.yml
+```
