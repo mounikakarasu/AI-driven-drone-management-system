@@ -1,6 +1,6 @@
-It is a full-stack system that acts as the "brain" for autonomous drone operations. It processes telemetry data through a three-layer decision pipeline — computer vision, hard-coded safety rules, and machine learning — then explains every decision to the human operator in real time. The system prioritizes transparent autonomy: operators don't just see what the drone decides, they see why.
+a full stack system that acts as the brain for autonomous drone operations. It processes telemetry data through a 3 layer decision pipeline — computer vision, hard coded safety rules, and machine learning and then explains every decision to the human operator in real time. The system prioritizes transparent autonomy and operators don't just see what the drone decides, they see why.
 
-Decision flow: Safety layer runs first and if a hard constraint is violated, the C++ engine overrides the ML model entirely. If the environment is "SAFE," the Random Forest evaluates all 5 telemetry features and SHAP deconstructs the prediction into per-feature importance percentages.
+Safety layer runs first and if a hard constraint is violated, the C++ engine overrides the ML model entirely. If the environment is SAFE, the Random Forest evaluates all 5 telemetry features and SHAP deconstructs the prediction into per-feature importance percentages.
 
 Stack:
 -Frontend: React 19, Tailwind CSS, Recharts, Framer Motion  
